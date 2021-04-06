@@ -1,0 +1,147 @@
+EX1 with read commited
+1)
+T1: begin;
+T1: set transaction isolation level READ COMMITTED;
+T1: SELECT * FROM account;
+2)
+T2: begin;
+T2: set transaction isolation level READ COMMITTED;
+T2: UPDATE account SET username = 'ajones' WHERE fullname = 'Alice Jones';
+3) 
+T1: SELECT * FROM account;
+4)
+T2: SELECT * FROM account;
+Explanation: Both terminals shows different information in terms of account Alice Jones. It hepens, since Non-repeatable read. 
+5) 
+T2: commit;
+T1: SELECT * FROM account;
+T2: SELECT * FROM account;
+Explanation: Both terminals shows the same, since we commit changes.
+6)
+T2: begin;
+7)
+T1: UPDATE account SET balance = balance + 10 WHERE username = 'ajones';
+8) 
+T2: UPDATE account SET balance = balance + 20 WHERE username = 'ajones';
+EXPLANATION: Second terminal shows nothing, since lost update happens.
+9) 
+T1: commit;
+10)
+T2: rollback;
+
+EX1 with repeatable read
+1)
+T1: begin;
+T1: set transaction isolation level REPEATABLE READ;
+T1: SELECT * FROM account;
+2)
+T2: begin;
+T2: set transaction isolation level REPEATABLE READ;
+T2: UPDATE account SET username = 'ajones' WHERE fullname = 'Alice Jones';
+3) 
+T1: SELECT * FROM account;
+4)
+T2: SELECT * FROM account;
+Explanation: Both terminals shows different information in terms of account Alice Jones.
+5) 
+T2: commit;
+T1: SELECT * FROM account;
+T2: SELECT * FROM account;
+Explanation: Both terminals still shows different information, since non-repeatable read is impossible with repeatable read isolation level.
+6)
+T2: begin;
+7)
+T1: UPDATE account SET balance = balance + 10 WHERE username = 'jones';
+EXPLANATION: The following commands is impossible, since terminal can's serialize access due to parallel changes. 
+
+EX2 with read_commited
+1)
+T1: begin;
+T1: set transaction isolation level READ COMMITTED;
+T2: begin;
+T2: set transaction isolation level READ COMMITTED;
+2)
+T1: SELECT * FROM account WHERE group_id = 2;
+3)
+T2: UPDATE account SET group_id = 2 WHERE fullname = 'Bob Brown';
+4)
+T1: SELECT * FROM account WHERE group_id = 2;
+5)
+T1: UPDATE account SET balance = balance + 15 WHERE group_id = 2;
+6)
+T1: commit;
+T2: commit;
+Explanation: Group_id assigned to Bob was changed unlike Bob balance. At the same time Michael balance was changed by +15
+
+EX2 with repeatable_read
+1)
+T1: begin;
+T1: set transaction isolation level REPEATABLE READ;
+T2: begin;
+T2: set transaction isolation level REPEATABLE READ;
+2)
+T1: SELECT * FROM account WHERE group_id = 2;
+3)
+T2: UPDATE account SET group_id = 2 WHERE fullname = 'Bob Brown';
+4)
+T1: SELECT * FROM account WHERE group_id = 2;
+5)
+T1: UPDATE account SET balance = balance + 15 WHERE group_id = 2;
+6)
+T1: commit;
+T2: commit;
+Explanation: Group_id assigned to Bob was changed unlike Bob balance. At the same time Michael balance was changed by +15
+
+Boh method has the same result
+
+Ex3 with repeatable read
+1)
+T1: begin;
+T1: set transaction isolation level REPEATABLE READ;
+T2: begin;
+T2: set transaction isolation level REPEATABLE READ;
+2)
+T1: SELECT SUM(balance) FROM account WHERE group_id = 2;
+3)
+T2: UPDATE account SET group_id = 2 WHERE fullname = 'Bob Brown';
+4)
+T1: SELECT * FROM account;
+5)
+T1: UPDATE account SET balance = balance + sum WHERE group_id = 2;
+6)
+T1: SELECT * FROM account WHERE group_id = 2;
+T2: SELECT * FROM account WHERE group_id = 2;
+7) 
+T1: commit;
+T2: commit;
+
+Explanation: Balance of Bob brown doesn't change, due to anomaly in sql, at the same time balance of Michale Dole was increased by 73(it's the sum of the balances which belongs to people from group_id = 2)
+
+Ex3 with Serializable
+1)
+T1: begin;
+T1: set transaction isolation level Serializable;
+T2: begin;
+T2: set transaction isolation level Serializable;
+2)
+T1: SELECT SUM(balance) FROM account WHERE group_id = 2;
+3)
+T2: UPDATE account SET group_id = 2 WHERE fullname = 'Bob Brown';
+4)
+T1: SELECT * FROM account;
+5)
+T1: UPDATE account SET balance = balance + sum WHERE group_id = 2;
+6)
+T1: SELECT * FROM account WHERE group_id = 2;
+T2: SELECT * FROM account WHERE group_id = 2;
+7) 
+T1: commit;
+T2: commit;
+
+Explanation: Balance of Bob brown doesn't change, due to anomaly in sql, at the same time balance of Michale Dole was increased by 73(it's the sum of the balances which belongs to people from group_id = 2)
+We can't succesfully commit the transaction in 2nd terminal, since can't serialiaze access to dependendencies of read/write operations between transactions.
+
+
+
+
+
