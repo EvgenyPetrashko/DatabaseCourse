@@ -1,0 +1,15 @@
+1) CREATE (a: Fighter{name:"Khabib Nurmagomedov", weight: 155});
+2) match (a:Fighter) where a.name= "Khabib Nurmagomedov" create (b:Fighter{name: "Rafael Dos Anjos", weight: "155"}),(a)-[:beats]->(b);
+3) match (a:Fighter) where a.name= "Rafael Dos Anjos" create (b:Fighter{name: "Neil Magny", weight: "170"}),(a)-[:beats]->(b);
+4) CREATE (a: Fighter{name:"Jon Jones", weight: 205});
+5) match (a:Fighter) where a.name= "Jon Jones" create (b:Fighter{name: "Daniel Cormier", weight: "205"}),(a)-[:beats]->(b);
+6) CREATE (a: Fighter{name:"Michael Bisping", weight: 185});
+7) match (a:Fighter) where a.name= "Michael Bisping" create (b:Fighter{name: "Matt Hamill", weight: "185"}),(a)-[:beats]->(b);
+8) match (a:Fighter) where a.name= "Jon Jones" create (b:Fighter{name: "Brandon Vera", weight: "205"}),(a)-[:beats]->(b);
+9) match (a:Fighter) where a.name= "Brandon Vera" create (b:Fighter{name: "Frank Mir", weight: "230"}),(a)-[:beats]->(b);
+10) match (a:Fighter) where a.name= "Frank Mir" create (b:Fighter{name: "Brock Lesnar", weight: "230"}),(a)-[:beats]->(b);
+11) match (a:Fighter) where a.name= "Neil Magny" create (b:Fighter{name: "Kelvin Gastelum", weight: "185"}),(a)-[:beats]->(b);
+12) match (a:Fighter{name:"Kelvin Gastelum"}), (b:Fighter{name:"Michael Bisping"}) CREATE (a)-[:beats]->(b);
+13) match (a:Fighter{name:"Michael Bisping"}), (b:Fighter{name:"Matt Hamill"}) CREATE (a)-[:beats]->(b);
+14) match (a:Fighter{name:"Michael Bisping"}), (b:Fighter{name:"Kelvin Gastelum"}) CREATE (a)-[:beats]->(b);
+15) match (a:Fighter{name:"Matt Hamill"}), (b:Fighter{name:"Jon Jones"}) CREATE (a)-[:beats]->(b);
